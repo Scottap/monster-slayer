@@ -17,6 +17,7 @@ var vm = new Vue({
         healCost: 25,
         monsterAttackMin: 5,
         monsterAttackMax: 12,
+        turns: [],
         inGame: false
     },
     methods: {
@@ -30,22 +31,42 @@ var vm = new Vue({
             return Math.max(Math.floor(Math.random() * max) + 1, min)
         },
         myAttack: function (min, max) {
-            return this.monsterHealth -= this.calculateRNG(min, max);
+            var damage = this.calculateRNG(min, max);
+            this.monsterHealth -= damage;
+            this.turns.unshift({
+                isPlayer: true,
+                text: 'You hit the monster for ' + damage
+            });
         },
         myHeal: function (min, max) {
-            return this.myHealth += this.calculateRNG(min, max);
+            var heal = this.calculateRNG(min, max);
+            this.myHealth += heal;
+            this.turns.unshift({
+                isPlayer: true,
+                text: 'You healed for ' + heal
+            });
         },
         myMana: function (val) {
-            return this.currentMana += val
+            var mana = val;
+            this.currentMana += mana;
+            this.turns.unshift({
+                isPlayer: true,
+                text: 'You restored ' + mana + ' mana'
+            });
         },
         monsterAttack: function (min, max) {
-            return this.myHealth -= this.calculateRNG(min, max);
+            var monsterDamage = this.calculateRNG(min, max);
+            this.myHealth -= monsterDamage;
+            this.turns.unshift({
+                isPlayer: false,
+                text: 'The monster hit you for ' + monsterDamage
+            });
         },
         lessThanZero: function (char) {
             return char <= 0
         },
         fullBarsCheck: function (char) {
-            return char >=90
+            return char >= 90
         },
         anyDeadCheck: function() {
 
@@ -66,18 +87,10 @@ var vm = new Vue({
             }
         },
         attackTurn: function () {
+            var damage =
             this.myAttack(this.attackMin, this.attackMax);
             this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax);
             this.anyDeadCheck()
-        },
-        manaTurn: function () {
-            if (!this.fullBarsCheck(this.currentMana)) {
-                this.myMana(30);
-                this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax)
-            } else if (this.fullBarsCheck(this.currentMana)) {
-                alert("You can't recharge up to full mana!");
-                this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax)
-            }
         },
         spAttackTurn: function () {
             if (this.manaCheck()) {
@@ -102,6 +115,15 @@ var vm = new Vue({
             if (this.lessThanZero(this.myHealth)) {
                 alert("You're fucking dead.");
                 this.inGame = false;
+            }
+        },
+        manaTurn: function () {
+            if (!this.fullBarsCheck(this.currentMana)) {
+                this.myMana(30);
+                this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax)
+            } else if (this.fullBarsCheck(this.currentMana)) {
+                alert("You can't recharge up to full mana!");
+                this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax)
             }
         },
         giveUp: function () {
