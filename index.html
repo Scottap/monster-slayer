@@ -16,6 +16,11 @@
                     {{ myHealth }}
                 </div>
             </div>
+            <div class="manabar">
+                <div class="manabar text-center" :style="{width: currentMana + '%'}" style="background-color: blue; margin: 0; color: white;">
+                    {{ currentMana }}
+                </div>
+            </div>
         </div>
         <div class="small-6 columns">
             <h1 class="text-center">MONSTER</h1>
@@ -36,6 +41,7 @@
                 <button @click="attackTurn" id="attack">ATTACK</button>
                 <button @click="spAttackTurn" id="special-attack">SPECIAL ATTACK</button>
                 <button @click="healTurn" id="heal">HEAL</button>
+                <button @click="manaTurn" id="mana">MANA</button>
                 <button @click="giveUp" id="give-up">GIVE UP</button>
             </div>
         </section>

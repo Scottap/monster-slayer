@@ -23,6 +23,7 @@ var vm = new Vue({
         startGemu: function () {
             this.inGame = !this.inGame;
             this.monsterHealth = 100;
+            this.currentMana = 100;
             this.myHealth = 100
         },
         calculateRNG: function (min, max) {
@@ -34,27 +35,48 @@ var vm = new Vue({
         myHeal: function (min, max) {
             return this.myHealth += this.calculateRNG(min, max);
         },
+        myMana: function (val) {
+            return this.currentMana += val
+        },
         monsterAttack: function (min, max) {
             return this.myHealth -= this.calculateRNG(min, max);
         },
-        attackTurn: function () {
-            this.myAttack(this.attackMin, this.attackMax);
-            this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax);
-            if (this.monsterHealth <=0) {
+        lessThanZero: function (char) {
+            return char <= 0
+        },
+        fullBarsCheck: function (char) {
+            return char >=90
+        },
+        anyDeadCheck: function() {
+
+            if (this.lessThanZero(this.monsterHealth)) {
                 alert('"I YIELD", the monster says.');
                 this.inGame = false;
-                return
-            } else if (this.myHealth <= 0) {
-                alert("You're fucking dead.");
-                this.inGame = false;
+            } else if (this.lessThanZero(this.myHealth)) {
+                alert("You're fucking dead");
+                this.inGame = false
             }
         },
         manaCheck: function () {
-            if (this.currentMana <= 0) {
+            if (this.lessThanZero(this.currentMana)) {
                 alert('Not enough mana!');
                 return false
             } else {
                 return true
+            }
+        },
+        attackTurn: function () {
+            this.myAttack(this.attackMin, this.attackMax);
+            this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax);
+            this.anyDeadCheck()
+        },
+        manaTurn: function () {
+            if (!this.fullBarsCheck(this.currentMana)) {
+                this.myMana(30);
+                this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax)
+            } else if (this.fullBarsCheck(this.currentMana)) {
+                alert("You can't recharge up to full mana!");
+                this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax)
             }
         },
         spAttackTurn: function () {
@@ -65,29 +87,19 @@ var vm = new Vue({
             } else {
                 this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax);
             }
-            if (this.monsterHealth <=0) {
-                alert('"I YIELD", the monster says.');
-                this.inGame = false;
-                return
-            } else if (this.myHealth <= 0) {
-                alert("You're fucking dead.");
-                this.inGame = false;
-            }
-        },
-        fullHealthCheck: function () {
-            return this.myHealth >=90
+            this.anyDeadCheck()
         },
         healTurn: function () {
-            if (this.manaCheck() && !this.fullHealthCheck()) {
+            if (this.manaCheck() && !this.fullBarsCheck(this.myHealth)) {
                 this.myHeal(this.healMin, this.healMax);
                 this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax);
                 this.currentMana -= this.healCost;
-            } else if (this.fullHealthCheck()) {
+            } else if (this.fullBarsCheck(this.myHealth)) {
                 alert("You can't heal up to full health!");
                 this.monsterAttack(this.monsterAttackMin, this.monsterAttackMax);
             }
 
-            if (this.myHealth <= 0) {
+            if (this.lessThanZero(this.myHealth)) {
                 alert("You're fucking dead.");
                 this.inGame = false;
             }
@@ -96,7 +108,8 @@ var vm = new Vue({
             alert('QUITTER');
             this.monsterHealth = 100;
             this.myHealth = 100;
-            this.inGame = false
+            this.currentMana = 100;
+            this.inGame = !this.inGame
         }
     }
 });
